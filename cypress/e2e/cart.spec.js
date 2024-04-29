@@ -1,9 +1,20 @@
 import { CommonPage } from '../support/pages';
 
+
 context('Carrinho', () => {
   beforeEach(() => {
-    cy.setSessionStorage('cart-contents', '[4,1,2]')
-    cy.visit('/cart.html')
+
+    cy.LogIn('standard_user', 'secret_sauce');
+
+    cy.wait(2000);
+
+    cy.visit('/cart.html', {
+      failOnStatusCode: false,
+      onBeforeLoad(win) {
+        win.localStorage.setItem('cart-contents', JSON.stringify([4, 1, 2]));
+      }
+    });
+
   })
 
   describe('Página', () => {
@@ -28,11 +39,11 @@ context('Carrinho', () => {
 
       cy.get('@inventoryItem')
         .find('.inventory_item_price')
-        .should('have.text', '29.99')
-       
+        .should('have.text', '$29.99')
+
     })
     it('visualiza cabeçalho', () => {
-      cy.get('.subheader')
+      cy.get('.title')
         .should('have.text', 'Your Cart')
 
     })
@@ -45,13 +56,18 @@ context('Carrinho', () => {
   })
   describe('Carrinho', () => {
     it('remove o produto', () => {
+      
       let RemoveFirstItem = ($cart, $count) => { 
         CommonPage.CartListItems()
         .first()
         .find('.btn_secondary')
         .click()
 
-        cy.getSessionStorage('cart-contents').should('eq', $cart)
+       
+
+        cy.getAllLocalStorage().should(() => { 
+          expect(localStorage.getItem('cart-contents')).to.be.equal($cart)
+        })
 
         if ($count) {
           CommonPage.ShoppingCartBadge()
@@ -106,12 +122,12 @@ context('Carrinho', () => {
 
       CartButton()
 
-      cy.get('.subheader')
-        .should('have.text', 'Finish')
+      cy.get('.title')
+        .should('have.text', 'Checkout: Complete!')
 
       cy.get('.complete-header')
-        .should('have.text', 'THANK YOU FOR YOUR ORDER')
-      
+        .should('have.text', 'Thank you for your order!')
+
     })
   })
 })

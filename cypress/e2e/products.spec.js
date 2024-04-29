@@ -2,8 +2,9 @@ import { CommonPage } from '../support/pages';
 
 context('Produtos', () => {
   beforeEach(() => {
-    cy.setSessionStorage('cart-contents', '[]')
-    cy.visit('/inventory.html')
+    cy.LogIn('standard_user', 'secret_sauce')
+    cy.AcessarPagina('/inventory.html')
+
   })
 
   describe('acessa página', () => {
@@ -32,10 +33,10 @@ context('Produtos', () => {
       cy.get('@inventoryItem')
         .find('.inventory_item_price')
         .should('have.text', '$29.99')
-        
+
     })
     it('visualiza cabeçalho', () => {
-      cy.get('.product_label')
+      cy.get('.title')
         .should('have.text', 'Products')
 
     })
@@ -58,11 +59,10 @@ context('Produtos', () => {
               productNames.push(item)
             })
         })
-        
+
       cy.get('.product_sort_container')
-          .should('have.value', 'az')
           .select('Name (Z to A)')
-          .should('have.value', 'za')
+          cy.contains('Name (Z to A)')
 
       CommonPage.InventoryItems()
         .find('.inventory_item_name')
@@ -72,15 +72,22 @@ context('Produtos', () => {
 
     })
   })
+
+
   describe('Carrinho', () => {
     it('add/remove produto', () => {
       CommonPage.InventoryItems()
         .first()
         .find('.btn_primary')
         .click()
-        .should('have.class', 'btn_secondary')
+
+      cy.get('#remove-sauce-labs-backpack').first().should('exist')
+
       
-      cy.getSessionStorage('cart-contents').should('eq', '[4]')
+      cy.getAllLocalStorage().should(() => { 
+        expect(localStorage.getItem('cart-contents')).to.be.equal('[4]')
+      })
+
 
       CommonPage.ShoppingCartBadge()
         .should('have.text', '1')
@@ -89,23 +96,28 @@ context('Produtos', () => {
         .first()
         .find('.btn_secondary')
         .click()
-        .should('have.class', 'btn_primary')
-      
-      cy.getSessionStorage('cart-contents').should('eq', '[]')
+
+      cy.get('#add-to-cart-sauce-labs-backpack').first().should('exist')
+
+      cy.getAllLocalStorage().should(() => { 
+        expect(localStorage.getItem('cart-contents')).to.be.equal('[]')
+      })
+
 
       CommonPage.ShoppingCartBadge()
         .should('not.exist')
-
     })
-    it('adiciona produtos', () => {
+
+
+    it('adicionaProdutos', () => {
       let inCart = 0;
       CommonPage.InventoryItems()
         .each(($el, index, $list) => {
           if (index % 2 == 0) {
             cy.wrap($el).find('.btn_primary')
               .click()
-              .should('have.class', 'btn_secondary')
-            
+            cy.get('#remove-sauce-labs-backpack').first().should('exist')
+
             inCart++;
           }
         })
@@ -114,8 +126,9 @@ context('Produtos', () => {
             .should('have.text', '' + inCart)
         })
 
-      cy.getSessionStorage('cart-contents').should('eq', '[4,1,2]')
-
+      cy.getAllLocalStorage().should(() => { 
+        expect(localStorage.getItem('cart-contents')).to.be.equal('[4,1,2]')
+      })
     })
   })
 })

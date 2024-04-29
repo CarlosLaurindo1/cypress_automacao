@@ -10,6 +10,7 @@ module.exports = defineConfig({
   trashAssetsBeforeRuns: true,
   defaultCommandTimeout: 10000,
   e2e: {
+    chromeWebSecurity: false,
     setupNodeEvents(on, config) {
       return require('./cypress/plugins/index.js')(on, config)
     },

@@ -3,6 +3,7 @@
     "cypress:open": "cypress open"
   },
   "devDependencies": {
-    "cypress": "^13.8.0"
+    "cypress": "^13.8.1",
+    "cypress-fail-on-console-error": "^5.1.1"
   }
 }
